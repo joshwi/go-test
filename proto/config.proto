@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package protobuf;
+option go_package = "../proto";
+
+service StreamService {
+  rpc StreamFile (stream Request) returns (Response) {}
+}
+
+message Request {
+  bytes data = 1;
+}
+
+message Response {
+  bool success = 1;
+}
