@@ -8,9 +8,13 @@ service StreamService {
 }
 
 message Request {
-  bytes data = 1;
+  string file = 1;
+  int64 index = 2;
+  bytes data = 3;
 }
 
 message Response {
-  bool success = 1;
+  string file = 1;
+  int64 size = 2;
+  bool completed = 3;
 }
