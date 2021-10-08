@@ -6,16 +6,24 @@ import (
 	"log"
 	"os"
 
-	"github.com/joshwi/go-test/app/proto"
-	"github.com/joshwi/go-test/app/utils"
+	proto "../proto"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
 
+func Env(key string) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("Load .env Error", err)
+	}
+	return os.Getenv(key)
+}
+
 func main() {
 
-	URI := utils.Env("URI")
-	PORT := utils.Env("PORT")
-	filename := utils.Env("FILENAME")
+	URI := Env("URI")
+	PORT := Env("PORT")
+	filename := Env("FILENAME")
 
 	f, err := os.Open(filename)
 	if err != nil {

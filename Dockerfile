@@ -9,11 +9,10 @@ RUN go mod download
 RUN go env GOOS GOARCH
 RUN pwd
 RUN ls -la
-WORKDIR /client
+RUN GOOS=linux GOARCH=arm64 go build ./client/client.go
 RUN pwd
 RUN ls -la
-RUN GOOS=linux GOARCH=arm64 go build client.go
-WORKDIR /server
-RUN GOOS=linux GOARCH=arm64 go build server.go
-WORKDIR /app
-CMD ["./client/client && ./server/server"]
+RUN GOOS=linux GOARCH=arm64 go build ./server/server.go
+RUN pwd
+RUN ls -la
+CMD ["./server && ./client"]

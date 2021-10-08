@@ -6,18 +6,26 @@ import (
 	"net"
 	"os"
 
-	"github.com/joshwi/go-test/app/proto"
-	"github.com/joshwi/go-test/app/utils"
+	proto "../proto"
+	"github.com/joho/godotenv"
 
 	"google.golang.org/grpc"
 )
+
+func Env(key string) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("Load .env Error", err)
+	}
+	return os.Getenv(key)
+}
 
 type server struct{}
 
 func main() {
 
-	URI := utils.Env("URI")
-	PORT := utils.Env("PORT")
+	URI := Env("URI")
+	PORT := Env("PORT")
 
 	lis, err := net.Listen("tcp", URI+":"+PORT)
 	if err != nil {
