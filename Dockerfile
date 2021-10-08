@@ -2,7 +2,9 @@ FROM golang:1.17
 WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
-COPY app /app
+COPY .env ./
+COPY main.go ./
+COPY /proto ./
 RUN go mod download
 RUN go env GOOS GOARCH
 RUN pwd

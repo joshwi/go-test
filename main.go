@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/joshwi/go-test/app/proto"
+	"github.com/joshwi/go-test/proto"
 	"google.golang.org/grpc"
 )
 

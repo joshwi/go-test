@@ -2,7 +2,7 @@ module github.com/joshwi/go-test
 
 go 1.16
 
-replace github.com/joshwi/go-test/app/proto => ./proto
+replace github.com/joshwi/go-test/proto => ./proto
 
 require (
 	github.com/joho/godotenv v1.4.0 // indirect
