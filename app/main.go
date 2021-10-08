@@ -1,14 +1,16 @@
-package server
+package main
 
 import (
+	"context"
+	"flag"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
 
-	proto "../proto"
 	"github.com/joho/godotenv"
-
+	"github.com/joshwi/go-test/app/proto"
 	"google.golang.org/grpc"
 )
 
@@ -20,9 +22,58 @@ func Env(key string) string {
 	return os.Getenv(key)
 }
 
+func InitClient() {
+
+	URI := Env("URI")
+	PORT := Env("PORT")
+	filename := Env("FILENAME")
+
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+
+	conn, err := grpc.Dial(URI+":"+PORT, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("could not connect: %v", err)
+	}
+	defer conn.Close()
+
+	c := proto.NewStreamServiceClient(conn)
+
+	stream, err := c.StreamFile(context.Background())
+	if err != nil {
+		log.Fatalf("request failed: %v", err)
+	}
+
+	index := 0
+
+	for {
+		chunk := make([]byte, 64*1024)
+		n, err := f.Read(chunk)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		stream.Send(&proto.Request{File: filename, Index: int64(index), Data: chunk[:n]})
+		index++
+	}
+
+	// close the stream and recieve result
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("failed to recieve response: %v", err)
+	}
+
+	log.Println(res)
+}
+
 type server struct{}
 
-func main() {
+func InitServer() {
 
 	URI := Env("URI")
 	PORT := Env("PORT")
@@ -60,7 +111,7 @@ func (*server) StreamFile(stream proto.StreamService_StreamFileServer) error {
 				os.Mkdir(dir+"/files", 0777)
 			}
 			access := os.FileMode(0644)
-			err := os.WriteFile(dir+"/files/"+filename, output, access)
+			err := ioutil.WriteFile(dir+"/files/"+filename, output, access)
 			if err != nil {
 				log.Fatalf("[ File: %v ] [ Error: %v ]", filename, err)
 			}
@@ -72,4 +123,19 @@ func (*server) StreamFile(stream proto.StreamService_StreamFileServer) error {
 		filename = msg.File
 		output = append(output, msg.Data...)
 	}
+}
+
+func main() {
+
+	var name string
+
+	flag.StringVar(&name, `n`, `c`, `Specify server or client`)
+	flag.Parse()
+
+	if name == "c" {
+		InitClient()
+	} else {
+		InitServer()
+	}
+
 }
